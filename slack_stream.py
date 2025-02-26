@@ -2,11 +2,11 @@ import streamlit as st
 import requests
 import json
 
-# --- Slack Webhook URL (Replace with your actual webhook) ---
-webhook_url = "https://hooks.slack.com/services/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"  # Use the one you provided
+# --- Slack Webhook URL ---
+webhook_url = "https://hooks.slack.com/services/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"
 
 def send_slack_message(message_text):
-    """Sends a message to Slack via the webhook.
+    """Sends a message to Slack via the webhook, ensuring proper JSON formatting.
 
     Args:
         message_text: The text of the message to send.
@@ -14,33 +14,43 @@ def send_slack_message(message_text):
     Returns:
         None
     """
-    message = {
-        "text": message_text
-    }
+    try:
+        # Explicitly create the JSON payload
+        message = {
+            "text": message_text
+        }
+        payload = json.dumps(message)  # Convert to JSON string
+
+    except TypeError as e:  # Catch JSON encoding errors
+        st.error(f"Error creating JSON payload: {e}.  Make sure your message is valid text.")
+        return  # Stop execution if JSON is invalid
+
     headers = {
         'Content-Type': 'application/json',
     }
-    response = requests.post(webhook_url, headers=headers, data=json.dumps(message))
 
-    if response.status_code == 200:
-        st.success("Message sent to Slack successfully!")  # Streamlit success message
-    else:
-        st.error(f"Error sending message to Slack: {response.status_code}, {response.text}") # Streamlit error message
+    try:
+        response = requests.post(webhook_url, headers=headers, data=payload)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+        st.success("Message sent to Slack successfully!")
+
+    except requests.exceptions.RequestException as e:  # Catch any request-related errors
+        st.error(f"Error sending message to Slack: {e}")
+    except Exception as e: #Catch all the rest of the exceptions
+        st.error(f"An error occurred {e}")
+
 
 
 # --- Streamlit App ---
 st.title("Slack Message Sender")
 
-# Text Input
-message_input = st.text_area("Enter your message:", "Hola para todos")  # Default message
+message_input = st.text_area("Enter your message:", "Hola para todos")
 
-# Send Button
 if st.button("Send to Slack"):
-    if message_input:  # Check if the message is not empty
+    if message_input:
         send_slack_message(message_input)
     else:
         st.warning("Please enter a message to send.")
 
-# --- Optional:  Add some extra UI elements ---
 st.sidebar.header("About")
-st.sidebar.markdown("This app sends messages to a Slack channel using a webhook.")
+st.sidebar.markdown("This app sends messages to a Slack channel using a webhook.  It ensures the message is properly formatted as JSON.")
