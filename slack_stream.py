@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # Replace with your actual webhook URL
-WEBHOOK_URL = "https://hooks.slack.com/services/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"  # REMOVE THIS AFTER TESTING
+WEBHOOK_URL = "https://hooks.slack.com/services/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"  # REMOVE THIS AFTER TESTING
 
 st.title("Slack Message Poster")
 
