@@ -2,8 +2,8 @@ import streamlit as st
 import requests
 import json
 
-# --- Slack Webhook URL ---
-webhook_url = "https://hooks.slack.com/services/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"
+# --- Slack Webhook URL ---   https://hooks.slack.com/services/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
+webhook_url = "https://hooks.slack.com/services/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"
 
 def send_slack_message(message_text):
     """Sends a message to Slack via the webhook, ensuring proper JSON formatting.
