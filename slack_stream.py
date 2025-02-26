@@ -1,26 +1,46 @@
 import streamlit as st
 import requests
+import json
 
-# Replace with your actual webhook URL
-WEBHOOK_URL = "https://hooks.slack.com/services/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"  # REMOVE THIS AFTER TESTING
+# --- Slack Webhook URL (Replace with your actual webhook) ---
+webhook_url = "https://hooks.slack.com/services/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"  # Use the one you provided
 
-st.title("Slack Message Poster")
+def send_slack_message(message_text):
+    """Sends a message to Slack via the webhook.
 
-user_text = st.text_area("Enter your message here:", height=150)
+    Args:
+        message_text: The text of the message to send.
 
-if st.button("Post to Slack"):
-    if user_text:
-        try:
-            payload = {"text": user_text}
-            response = requests.post(WEBHOOK_URL, json=payload)
+    Returns:
+        None
+    """
+    message = {
+        "text": message_text
+    }
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    response = requests.post(webhook_url, headers=headers, data=json.dumps(message))
 
-            if response.status_code == 200:
-                st.success("Message successfully posted to Slack!")
-            else:
-                st.error(f"Error posting message. Status code: {response.status_code}. Response: {response.text}")  # Display error details
-
-        except requests.exceptions.RequestException as e:
-            st.error(f"An error occurred: {e}")  # Handle network or other request-related errors
-
+    if response.status_code == 200:
+        st.success("Message sent to Slack successfully!")  # Streamlit success message
     else:
-        st.warning("Please enter a message before posting.")
+        st.error(f"Error sending message to Slack: {response.status_code}, {response.text}") # Streamlit error message
+
+
+# --- Streamlit App ---
+st.title("Slack Message Sender")
+
+# Text Input
+message_input = st.text_area("Enter your message:", "Hola para todos")  # Default message
+
+# Send Button
+if st.button("Send to Slack"):
+    if message_input:  # Check if the message is not empty
+        send_slack_message(message_input)
+    else:
+        st.warning("Please enter a message to send.")
+
+# --- Optional:  Add some extra UI elements ---
+st.sidebar.header("About")
+st.sidebar.markdown("This app sends messages to a Slack channel using a webhook.")
